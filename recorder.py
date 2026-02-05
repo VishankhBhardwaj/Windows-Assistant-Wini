@@ -35,7 +35,7 @@ def record_audio(filename, duration=5, samplerate=44100):
 
         frames.append(pcm_float.copy())
 
-        if prob < 0.5:
+        if prob < 0.2:
             silence_time[0] += frame_count / SAMPLE_RATE
         else:
             silence_time[0] = 0
@@ -49,12 +49,12 @@ def record_audio(filename, duration=5, samplerate=44100):
         blocksize=FRAME_LENGTH,
         callback=callback
     ):
-        sd.sleep(10000)
+        sd.sleep(5000)
 
     audio = np.concatenate(frames)
     audio_int16 = (audio * 32767).astype(np.int16)
     write(filename, SAMPLE_RATE, audio_int16)
     return True
 if __name__ == "__main__": 
-    record_audio("output.wav", duration=3, samplerate=44100) 
+    record_audio("Coice_commands/Command.wav", duration=3, samplerate=44100) 
     print("Audio recording complete.")

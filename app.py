@@ -8,7 +8,6 @@ from langchain_community.tools import DuckDuckGoSearchRun,Tool
 from langchain_community.tools import WikipediaQueryRun
 from langchain_community.utilities import WikipediaAPIWrapper,OpenWeatherMapAPIWrapper
 from langchain_google_community import GoogleSearchAPIWrapper
-
 from stt import transcribe
 import os
 
@@ -61,6 +60,10 @@ Instructions:
 3. **Reasoning:** If you need to search or use a tool, explain your thought process briefly in the 'Thought' step.
 4. **Output:** Once the tool is used, give a concise final answer.
 5. If you are usnure of anything and want some information to process further then politely ask user about the information and ask him to retry so that user can give you the command again
+6. If a tool has already been used and the task is completed,
+DO NOT call the tool again.
+Return final answer immediately.
+7. After final response is ready always make sure to use the speak_text tool at end for providing reply to user
 Tools available: Google Search, Wikipedia, Weather, System Controls (Volume, Chrome) etc.
 """
 
@@ -90,7 +93,7 @@ def agent_call(command:str)->str:
     agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
     verbose=True,
     handle_parsing_errors = True,
-    max_iterations=3
+    max_iterations=2
 )
     if agent:
         result = agent.run(command)   

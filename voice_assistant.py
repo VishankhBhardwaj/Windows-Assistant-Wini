@@ -1,6 +1,7 @@
 import pvporcupine
 import pvrecorder
 import os
+import random
 from recorder import record_audio
 from stt import transcribe,speech_generate
 from app import agent_call
@@ -16,6 +17,11 @@ class voiceAssistant:
         self.command = None
         self.final_command = None
         self.agent_reply = None
+        self.greetings = [
+            "Voice_commands/greet1.wav",
+            "Voice_commands/greet2.wav",
+            "Voice_commands/greet3.wav",
+        ]
     def initialize(self):
         try:
             if not os.path.exists(self.wake_word_path):
@@ -29,12 +35,6 @@ class voiceAssistant:
             )
             #Initialize recorder
             self.recorder = pvrecorder.PvRecorder(device_index=-1, frame_length=self.porcupine.frame_length)
-            
-
-            print(f"✅ Initialized successfully")
-            print(f"   Frame length: {self.porcupine.frame_length}")
-            print(f"   Sample rate: {self.porcupine.sample_rate}")
-                
             return True
         except Exception as e:
             print("Initialization failed",e)
@@ -53,12 +53,12 @@ class voiceAssistant:
                 keyword_index = self.porcupine.process(pcm)
                 if keyword_index >= 0:
                     print("Detected Keyword")
-                    self.speak("greet.wav")
-                    reply = record_audio("output.wav", duration=10, samplerate=44100)
+                    self.speak(random.choice(self.greetings))
+                    reply = record_audio("Voice_commands/Command.wav", duration=10, samplerate=44100)
                     print("here",reply)
                     if(reply):
-                        self.speak("acknowledgment.wav")
-                        self.command = transcribe("output.wav")
+                        self.speak("Voice_commands/acknowledgment.wav")
+                        self.command = transcribe("Voice_commands/command.wav")
                         print(self.command)
                         response = self.invoke_llm()
                         print(f"Final response is as follows:-{response}")
@@ -110,7 +110,7 @@ class voiceAssistant:
             self.recorder.delete()
         if self.porcupine is not None:
             self.porcupine.delete()
-        self.speak("Shutdown.wav")
+        self.speak("Voice_commands/Shutdown.wav")
         print("Cleaned up everything bye bye :)")
         sys.exit()
     
