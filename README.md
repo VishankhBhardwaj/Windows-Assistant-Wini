@@ -1,162 +1,345 @@
-## Wini – Windows Voice Assistant
+# Wini – Windows Voice Assistant
 
-Wini is a Windows desktop voice assistant that listens for a wake word, transcribes your speech, uses an LLM to understand your intent, and then controls your system or searches the web using a set of tools.
+Wini is an intelligent Windows desktop voice assistant that listens for a wake word, transcribes your speech using advanced AI models, understands your intent through a large language model, and executes system commands or searches the web—all through natural voice interaction.
 
-### Overview
+## 🌟 Features
 
-At a high level, Wini:
+### Voice Interaction
+- **Wake Word Detection**: Always-listening mode using Picovoice Porcupine for "Hey WINI" activation
+- **Voice Activity Detection (VAD)**: Automatic speech detection using Silero VAD that stops recording when you finish speaking
+- **Speech-to-Text**: High-accuracy transcription using OpenAI Whisper (large-v3) with GPU acceleration
+- **Text-to-Speech**: Natural-sounding voice responses using Kokoro TTS with customizable voices
 
-- **Listens for "Hey WINI"** using Picovoice Porcupine.
-- **Records your command** with a VAD-based recorder that stops when you finish speaking.
-- **Transcribes audio** to text using OpenAI Whisper (via `transformers`).
-- **Understands and acts** on the command using LangChain + a Groq-hosted Llama 3.3 model.
-- **Speaks responses back** using Kokoro TTS.
-- **Controls your system** (open apps/folders, adjust volume, etc.) and **performs web, Wikipedia, and weather searches** via tools.
+### AI-Powered Understanding
+- **LLM Agent**: Powered by Groq's Llama 3.3 70B model for intelligent command interpretation
+- **Context-Aware**: Handles spelling errors, filler words, and natural speech patterns
+- **Tool Integration**: Automatically selects and executes the appropriate tool based on your request
 
-### Project Structure
+### System Control Tools
+- **Volume Control**: Increase, decrease, or mute system volume
+- **Application Launcher**: Open any application, folder, file, or website
+- **Folder Access**: Quick access to Downloads, Documents, Desktop, Pictures, Music, and Videos
+- **Browser Integration**: Search the web or play music/videos directly
 
-- **`main.py`**: Entry point. Creates a `voiceAssistant` instance and starts the wake-word loop.
-- **`voice_assistant.py`**: Manages wake-word detection, audio recording, interaction with the LLM agent, and playback of responses.
-- **`app.py`**: Defines the LangChain agent (`agent_call`) using Groq’s Llama model and tools (system controls, search, weather, etc.).
-- **`stt.py`**: Speech-to-text using Whisper and text-to-speech generation using Kokoro TTS.
-- **`recorder.py`**: Microphone recording with Silero VAD to automatically stop when you stop speaking.
-- **`tools.py`**: LangChain tools for volume control, opening applications/folders, browser search, speaking text, and shutting down Wini.
-- **`requirements.txt`**: Python dependencies.
-- **`wake_words/`**: Porcupine wake-word model file(s) for "Hey WINI".
-- **Audio files (`greet.wav`, `acknowledgment.wav`, `reply.wav`, `Shutdown.wav`, `output.wav`)**: Used for greeting, acknowledgments, synthesized replies, and recorded commands.
+### Information Retrieval
+- **Web Search**: DuckDuckGo and Google Custom Search integration
+- **Wikipedia**: Quick facts and information lookup
+- **Weather**: Real-time weather information for any city via OpenWeatherMap
+- **Browser Search**: Direct YouTube and web searches
 
-There is also a local `venv/` directory for the Python virtual environment (optional and not required if you use your own venv).
+### Audio Feedback
+- **Multiple Greetings**: Randomized greeting sounds for natural interaction
+- **Acknowledgment Sounds**: Audio feedback when processing commands
+- **Shutdown Sound**: Graceful exit notification
 
-### Requirements
+## 📁 Project Structure
 
-- **Python 3.10+** (recommended)
-- **Windows** (the tools and `os.startfile` are Windows-oriented)
-- A working **microphone** and audio output device
-- All Python packages listed in `requirements.txt`
-- Several external API and access keys (set via environment variables):
-  - Groq API key (LLM)
-  - Hugging Face token (Whisper / Kokoro)
-  - Picovoice Porcupine access key (wake word)
-  - OpenWeatherMap API key (weather)
-  - Google Custom Search + API key (web search)
-
-### Setup and Installation
-
-1. **Clone the repository** (or copy the project folder).
-2. **Create and activate a virtual environment** (recommended):
-
-   ```bash
-   python -m venv venv
-   venv\Scripts\activate
-   ```
-
-3. **Install dependencies**:
-
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-4. **Create a `.env` file** in the project root with the required keys:
-
-   ```text
-   HF_TOKEN=YOUR_HF_TOKEN
-   GROQ_API_KEY=YOUR_GROQ_API_KEY
-   PORCUPINE_ACCESS_KEY=YOUR_PORCUPINE_ACCESS_KEY
-   ELEVENLABS_API_KEY=YOUR_ELEVENLABS_API_KEY   # if used
-   OPENWEATHERMAP_API_KEY=YOUR_OPENWEATHERMAP_API_KEY
-   GOOGLE_CSE_ID=YOUR_GOOGLE_CUSTOM_SEARCH_ENGINE_ID
-   GOOGLE_API_KEY=YOUR_GOOGLE_API_KEY
-   ```
-
-   Do **not** commit real keys to version control.
-
-5. **Ensure wake-word model** file exists at `wake_words/Hey-WINI_en_windows_v4_0_0.ppn` or update the path in `voice_assistant.py`.
-
-### Usage
-
-1. Activate your virtual environment (if not already activated).
-2. From the project root, run:
-
-   ```bash
-   python main.py
-   ```
-
-3. Wini will initialize the microphone and Porcupine, then listen for the wake word **“Hey WINI”**.
-4. After Wini detects the wake word:
-   - You’ll hear a greeting sound.
-   - Speak your command (e.g., “open Chrome”, “increase volume”, “search weather in Delhi”, “open downloads”, etc.).
-   - Wini will transcribe, call the LLM agent, and respond via speech.
-
-Press `Ctrl+C` in the terminal to stop Wini; it will clean up audio resources and play a shutdown sound.
-
-### Extending Wini
-
-- Add new tools or system actions by defining additional `@tool` functions in `tools.py` and registering them in the tools list used by `agent_call` in `app.py`.
-- You can customize prompts, models, or behavior inside `app.py` and `voice_assistant.py`.
-
-### Notes
-
-- This project uses online services (Groq, Hugging Face, OpenWeatherMap, Google, etc.). Make sure your machine has internet access when running Wini.
-- For best performance with Whisper and Kokoro, a GPU is helpful but not required.
-*** End of File
-
-This repository contains the source code for the **Wini** project.
-
-> Note: This README is a generic template. Update it with specific details about your project structure, features, and setup when available.
-
-### Overview
-
-Provide a brief description of what this project does, its main goals, and the problem it solves.
-
-### Project Structure
-
-Describe the important directories and files in this repository. For example:
-
-- **`src/`**: Main source code.
-- **`tests/`**: Automated tests.
-- **`data/`**: Data files or datasets (if applicable).
-
-Adjust these to match your actual structure.
-
-### Requirements
-
-List key tools and dependencies needed to work with this project, for example:
-
-- **Python 3.x** or another runtime
-- **Package manager** (e.g., `pip`, `npm`, `conda`) if applicable
-
-Add exact versions when they are known.
-
-### Setup and Installation
-
-Provide step-by-step instructions to get the project running locally. For example:
-
-1. Clone this repository.
-2. Create and activate a virtual environment (if using Python).
-3. Install dependencies.
-4. Run the application or scripts.
-
-Replace these steps with concrete commands once your environment is defined.
-
-### Usage
-
-Explain how to run the main scripts, services, or commands. Include example commands and expected behavior.
-
-### Testing
-
-Document how to run tests, if any. For example:
-
-```bash
-pytest
+```
+Wini/
+├── main.py                 # Entry point - initializes and starts the voice assistant
+├── voice_assistant.py      # Core assistant logic: wake word detection, recording, LLM interaction
+├── app.py                  # LangChain agent configuration with Groq LLM and tools
+├── stt.py                  # Speech-to-text (Whisper) and text-to-speech (Kokoro) modules
+├── recorder.py             # VAD-based audio recording with automatic silence detection
+├── tools.py                # LangChain tool definitions for system control and actions
+├── requirements.txt        # Python dependencies
+├── .env                    # Environment variables and API keys (not committed)
+├── Voice_commands/         # Pre-recorded audio files for greetings and responses
+│   ├── greet1.wav
+│   ├── greet2.wav
+│   ├── greet3.wav
+│   ├── acknowledgment.wav
+│   ├── Shutdown.wav
+│   ├── command.wav         # Recorded user command (temporary)
+│   └── reply.wav           # Generated TTS response (temporary)
+├── wake_words/             # Porcupine wake word model
+│   └── Hey-WINI_en_windows_v4_0_0.ppn
+└── reply.wav               # Generated TTS audio file
 ```
 
-or the relevant command for your stack.
+## 🛠️ Requirements
 
-### Contributing
+### System Requirements
+- **Operating System**: Windows 10/11
+- **Python**: 3.10 or higher (recommended)
+- **Hardware**: 
+  - Working microphone
+  - Audio output device
+  - GPU recommended for faster Whisper transcription (optional)
 
-If others will contribute to this project, describe the contribution workflow (branching, coding style, code review, etc.).
+### API Keys Required
+You'll need to obtain the following API keys:
 
-### License
+1. **Groq API Key** - For LLM (Llama 3.3 70B)
+   - Sign up at: https://console.groq.com
+   
+2. **Hugging Face Token** - For Whisper and Kokoro models
+   - Sign up at: https://huggingface.co/settings/tokens
+   
+3. **Picovoice Porcupine Access Key** - For wake word detection
+   - Sign up at: https://console.picovoice.ai
+   
+4. **OpenWeatherMap API Key** - For weather information
+   - Sign up at: https://openweathermap.org/api
+   
+5. **Google Custom Search API** - For web search
+   - Google API Key: https://console.cloud.google.com
+   - Custom Search Engine ID: https://programmablesearchengine.google.com
+
+## 🚀 Setup and Installation
+
+### 1. Clone the Repository
+```bash
+git clone https://github.com/VishankhBhardwaj/Windows-Assistant-Wini.git
+cd Wini
+```
+
+### 2. Create Virtual Environment
+```bash
+python -m venv venv
+venv\Scripts\activate
+```
+
+### 3. Install Dependencies
+```bash
+pip install -r requirements.txt
+```
+
+**Note**: If you encounter issues with PyTorch, install it separately:
+```bash
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+```
+
+### 4. Configure Environment Variables
+Create a `.env` file in the project root with your API keys:
+
+```env
+# Required API Keys
+GROQ_API_KEY=your_groq_api_key_here
+HF_TOKEN=your_huggingface_token_here
+PORCUPINE_ACCESS_KEY=your_porcupine_access_key_here
+OPENWEATHERMAP_API_KEY=your_openweathermap_api_key_here
+GOOGLE_API_KEY=your_google_api_key_here
+GOOGLE_CSE_ID=your_google_custom_search_engine_id_here
+
+# Optional (if using ElevenLabs instead of Kokoro)
+ELEVENLABS_API_KEY=your_elevenlabs_api_key_here
+```
+
+**⚠️ Important**: Never commit your `.env` file to version control!
+
+### 5. Verify Wake Word Model
+Ensure the wake word model exists at:
+```
+wake_words/Hey-WINI_en_windows_v4_0_0.ppn
+```
+
+If you need to create a custom wake word, visit [Picovoice Console](https://console.picovoice.ai).
+
+## 💻 Usage
+
+### Starting Wini
+
+1. Activate your virtual environment:
+```bash
+venv\Scripts\activate
+```
+
+2. Run the assistant:
+```bash
+python main.py
+```
+
+3. Wait for the initialization message:
+```
+🎤 Listening for 'Hey WINI'...
+Press Ctrl+C to stop
+```
+
+### Interacting with Wini
+
+1. **Say the wake word**: "Hey WINI"
+2. **Wait for the greeting sound** (confirms activation)
+3. **Speak your command** naturally
+4. **Wait for acknowledgment** (confirms command received)
+5. **Listen to the response**
+
+### Example Commands
+
+**System Control:**
+- "Open Chrome"
+- "Increase volume"
+- "Open Downloads folder"
+- "Mute volume"
+
+**Information Retrieval:**
+- "Search for weather in Delhi"
+- "What is artificial intelligence?" (Wikipedia)
+- "Search for Python tutorials" (Web search)
+
+**Media:**
+- "Play Bohemian Rhapsody" (YouTube)
+- "Search for relaxing music"
+
+**Shutdown:**
+- "Goodbye"
+- "Shutdown"
+- "Stop"
+
+### Stopping Wini
+
+Press `Ctrl+C` in the terminal. Wini will:
+- Clean up audio resources
+- Play a shutdown sound
+- Exit gracefully
+
+## 🔧 Technical Details
+
+### Architecture Flow
+
+```
+User speaks "Hey WINI" 
+    ↓
+Porcupine detects wake word
+    ↓
+Play greeting sound
+    ↓
+Record audio with VAD (auto-stops on silence)
+    ↓
+Play acknowledgment sound
+    ↓
+Whisper transcribes audio to text
+    ↓
+LangChain agent (Llama 3.3) processes command
+    ↓
+Agent selects and executes appropriate tool
+    ↓
+Kokoro generates TTS response
+    ↓
+Play audio response to user
+```
+
+### Key Technologies
+
+- **Wake Word**: Picovoice Porcupine (custom "Hey WINI" model)
+- **VAD**: Silero VAD (automatic speech detection)
+- **STT**: OpenAI Whisper large-v3 (via faster-whisper)
+- **LLM**: Groq Llama 3.3 70B Versatile
+- **TTS**: Kokoro ONNX (voice: af_heart)
+- **Agent Framework**: LangChain with ZERO_SHOT_REACT_DESCRIPTION agent
+- **Audio**: sounddevice, soundfile, numpy
+
+### Agent Configuration
+
+- **Model**: llama-3.3-70b-versatile
+- **Temperature**: 0 (deterministic responses)
+- **Max Iterations**: 2 (prevents infinite loops)
+- **Agent Type**: ZERO_SHOT_REACT_DESCRIPTION
+- **Error Handling**: Enabled with graceful fallbacks
+
+## 🎨 Customization
+
+### Adding New Tools
+
+1. Define a new tool in `tools.py`:
+```python
+from langchain.tools import tool
+
+@tool
+def my_custom_tool(command: str) -> str:
+    """Description of what this tool does"""
+    # Your implementation
+    return "Success message"
+```
+
+2. Register it in `app.py`:
+```python
+agent = initialize_agent(
+    tools=[..., my_custom_tool],  # Add your tool here
+    ...
+)
+```
+
+### Changing TTS Voice
+
+Edit `stt.py` line 33:
+```python
+generator = pipeline(reply, voice='af_heart')  # Change voice here
+```
+
+Available voices: Check Kokoro documentation for options.
+
+### Adjusting Wake Word Sensitivity
+
+Edit `voice_assistant.py` line 34:
+```python
+sensitivities=[0.8]  # Range: 0.0 to 1.0 (higher = more sensitive)
+```
+
+### Modifying VAD Settings
+
+Edit `recorder.py`:
+```python
+SILENCE_LIMIT = 1.0  # Seconds of silence before stopping
+```
+
+## 🧪 Testing
+
+Test individual components:
+
+```bash
+# Test speech-to-text and text-to-speech
+python stt.py
+
+# Test audio recording
+python recorder.py
+
+# Test imports and dependencies
+python test_imports.py
+```
+
+## 🐛 Troubleshooting
+
+### Common Issues
+
+**1. "Wake word file not found"**
+- Ensure `wake_words/Hey-WINI_en_windows_v4_0_0.ppn` exists
+- Check the path in `voice_assistant.py`
+
+**2. "CUDA out of memory"**
+- Reduce Whisper model size in `stt.py`: Change `large-v3` to `medium` or `small`
+- Or use CPU: Change `device="cuda"` to `device="cpu"`
+
+**3. "No module named 'X'"**
+- Reinstall requirements: `pip install -r requirements.txt`
+- Check virtual environment is activated
+
+**4. "API key error"**
+- Verify all keys in `.env` are correct
+- Ensure `.env` is in the project root
+- Check for extra spaces or quotes in `.env`
+
+**5. Microphone not detected**
+- Check Windows audio settings
+- Ensure microphone permissions are granted
+- Try different microphone device index in `voice_assistant.py`
+
+## 📝 Notes
+
+- **Internet Required**: This project uses online services (Groq, Hugging Face, OpenWeatherMap, Google)
+- **GPU Recommended**: For faster Whisper transcription, but CPU works fine
+- **Privacy**: All voice processing happens locally except for LLM calls to Groq
+- **Rate Limits**: Be aware of API rate limits for free tiers
+
+## 🤝 Contributing
+
+Contributions are welcome! Feel free to:
+- Add new tools and features
+- Improve error handling
+- Enhance documentation
+- Report bugs or suggest improvements
+
+## 📄 License
 
 MIT License
 
@@ -180,3 +363,17 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
+## 🙏 Acknowledgments
+
+- **Picovoice** for Porcupine wake word detection
+- **OpenAI** for Whisper speech recognition
+- **Groq** for fast LLM inference
+- **Kokoro** for natural text-to-speech
+- **LangChain** for agent framework
+- **Silero** for voice activity detection
+
+---
+
+**Made with ❤️ by Vishankh**
+
+For questions or support, please open an issue on GitHub.
